@@ -18,7 +18,7 @@ module.exports = [
   {
     devtool: process.env.NODE_ENV === 'production' ? false : 'inline-source-map',
     entry: path.join(SRC_ROOT, "client/index.jsx"),
-    mode: "development",
+    mode: "production",
     module: {
       rules: [
         {
