@@ -1,7 +1,5 @@
 import _ from "lodash";
-import moment from "moment-timezone";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
 import styled from "styled-components";
 
 import { Container } from "../../components/layouts/Container";
@@ -11,7 +9,6 @@ import { Heading } from "../../components/typographies/Heading";
 import { useAuthorizedFetch } from "../../hooks/useAuthorizedFetch";
 import { useFetch } from "../../hooks/useFetch";
 import { Color, Radius, Space } from "../../styles/variables";
-import { isSameDay } from "../../utils/DateUtils";
 import { authorizedJsonFetcher, jsonFetcher } from "../../utils/HttpUtils";
 
 import { ChargeDialog } from "./internal/ChargeDialog";
@@ -81,26 +78,18 @@ function useTodayRacesWithAnimation(races) {
  * @param {Model.Race[]} todayRaces
  * @returns {string | null}
  */
-function useHeroImage(todayRaces) {
-  const firstRaceId = todayRaces[0]?.id;
-  const url =
-    firstRaceId !== undefined
-      ? `/api/hero?firstRaceId=${firstRaceId}`
-      : "/api/hero";
+function useHeroImage() {
+  const url = "/api/hero";
   const { data } = useFetch(url, jsonFetcher);
-
-  if (firstRaceId === undefined || data === null) {
+  if (data === null) {
     return null;
   }
-
   const imageUrl = `${data.url}?${data.hash}`;
   return imageUrl;
 }
 
 /** @type {React.VFC} */
 export const Top = () => {
-  const { date = moment().format("YYYY-MM-DD") } = useParams();
-
   const ChargeButton = styled.button`
     background: ${Color.mono[700]};
     border-radius: ${Radius.MEDIUM};
@@ -119,7 +108,10 @@ export const Top = () => {
     authorizedJsonFetcher,
   );
 
-  const { data: raceData } = useFetch("/api/races", jsonFetcher);
+  const _d = new Date();
+  const since = new Date(_d.getFullYear(), _d.getMonth(), _d.getDate(), 0, 0, 0).getTime() / 1000;
+  const until = new Date(_d.getFullYear(), _d.getMonth(), _d.getDate(), 23, 59, 59).getTime() / 1000;
+  const { data: raceData } = useFetch(`/api/races?since=${since}&until=${until}`, jsonFetcher);
 
   const handleClickChargeButton = useCallback(() => {
     if (chargeDialogRef.current === null) {
@@ -136,16 +128,10 @@ export const Top = () => {
   const todayRaces =
     raceData != null
       ? [...raceData.races]
-          .sort(
-            (/** @type {Model.Race} */ a, /** @type {Model.Race} */ b) =>
-              moment(a.startAt) - moment(b.startAt),
-          )
-          .filter((/** @type {Model.Race} */ race) =>
-            isSameDay(race.startAt, date),
-          )
       : [];
-  const todayRacesToShow = useTodayRacesWithAnimation(todayRaces);
-  const heroImageUrl = useHeroImage(todayRaces);
+  // const todayRacesToShow = useTodayRacesWithAnimation(todayRaces);
+  const todayRacesToShow = todayRaces
+  const heroImageUrl = useHeroImage();
 
   return (
     <Container>
