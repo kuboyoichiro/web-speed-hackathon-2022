@@ -40,6 +40,12 @@ const RaceTitle = styled.h2`
   font-weight: bold;
 `;
 
+const Img = styled.img`
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+`
+
 /**
  * @typedef ItemProps
  * @property {Model.Race} race
@@ -93,7 +99,10 @@ const Item = ({ race }) => {
 
         <Stack.Item grow={0} shrink={0}>
           <Stack horizontal alignItems="center" gap={Space * 2}>
+            {/*
             <TrimmedImage height={100} src={race.image} width={100} />
+            */}
+            <Img src={race.image} loading="lazy" />
             <RaceButton to={`/races/${race.id}/race-card`}>投票</RaceButton>
           </Stack>
         </Stack.Item>
